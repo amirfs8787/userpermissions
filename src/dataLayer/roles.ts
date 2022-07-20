@@ -1,17 +1,16 @@
 
 import { IRole, rolesSchema } from './models/roles';
 import { model } from 'mongoose';
-import { permissions } from '../types/roles';
+import { permissions, role } from '../types/roles';
 
 const Role = model<IRole>('Role', rolesSchema);
 
-const createRole = async (role: IRole) => {
-    console.log('***role', role)
-    return await Role.create(role)
-};
+const createRole = async (role: IRole) => await Role.create(role);
 
-const updateRole = async (role: string, permissions: permissions) => await Role.findOneAndUpdate({role}, {permissions}, {new: true});
+const getRole = async (role: string) => Role.findOne({ role });
 
-const deleteRole = async (role: string) => await Role.create(role);
+const updateRole = async (role: string, permissions: permissions) => await Role.findOneAndUpdate({ role }, { permissions }, { new: true });
 
-export { createRole, updateRole, deleteRole };
+const deleteRole = async (role: string) => await Role.deleteOne({ role });
+
+export { createRole, getRole, updateRole, deleteRole };

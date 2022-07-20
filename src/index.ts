@@ -1,8 +1,11 @@
 import 'dotenv/config';
 import express from 'express';
-import { rolesRouter } from './routes/roles';
+import { usersRouter } from './routes/users'
+import { rolesRouter } from './routes/roles'
+import { ordersRouter } from './routes/orders';
 import jwt from 'jsonwebtoken';
 import { connect } from 'mongoose';
+import { getRoleOfRequestingUser } from './validations';
 const app = express();
 
 const { PORT = '3000', JWT_SECRET, MONGO_CONNECTION_STRING } = process.env;
@@ -29,7 +32,13 @@ app.use(express.json());
 
 app.use(authenticateToken);
 
+app.use(getRoleOfRequestingUser)
+
 app.use('/roles', rolesRouter);
+
+app.use('/users', usersRouter);
+
+app.use('/orders', ordersRouter);
 
 const connectAndStartServer = async () => {
   await connect(MONGO_CONNECTION_STRING!);

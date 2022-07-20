@@ -1,43 +1,65 @@
 import express from 'express';
-import { actionValidation } from '../validations';
-import { createRole } from '../dataLayer/roles';
-import { permissions, role } from '../types/roles';
+import { validateRole, isAdmin } from '../validations';
+import { getRole, createRole, updateRole, deleteRole } from '../dataLayer/roles';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  //get all roles
-  res.send('  home page')
-})
 
-// define the about route
-router.post('/', actionValidation, async (req, res) => {
-  console.log('***got to POST')
-
-  const {roleType, permissions}: { roleType: role; permissions: permissions } = req.body;
-  const roleToCreate = {role: roleType, permissions: JSON.stringify(permissions)}
-  
-  console.log('post body', roleToCreate)
-  let createdRole = null;
+router.get('/:roleType', isAdmin, async (req, res) => {
+  let roleFromDB;
   try {
-    createdRole = await createRole(roleToCreate);
+    roleFromDB = await getRole(req.params.roleType);
 
-  } catch(err) {
-    console.log('error creating role')
-  }
-  if(createdRole) {
-    createdRole.permissions = JSON.parse(createdRole.permissions)
-
+  } catch (err) {
+    //Todo: send status code based on error type 
+    res.send('Error getting role')
   }
 
-  res.json({message: 'Successfully created role', data: createdRole})
+  res.json({ data: roleFromDB })
 })
-router.patch('/:internalId', actionValidation, async (req, res) => {
 
-  res.send('About  ')
-})
-router.delete('/:internalId', actionValidation, async (req, res) => {
+router.post('/', isAdmin, async (req, res) => {
+  const roleToAdd = req.body;
+  validateRole(roleToAdd, res)
+  let createdRole;
+  try {
+    createdRole = await createRole(roleToAdd);
 
-  res.send('About  ')
+  } catch (err) {
+    //Todo: send status code based on error type 
+    res.send('Error creating role')
+  }
+
+  res.json({ message: 'Successfully created role', data: createdRole })
 })
+
+router.patch('/', isAdmin, async (req, res) => {
+  const roleToUpdate = req.body;
+  validateRole(roleToUpdate, res)
+  let updatedRole;
+  try {
+    updatedRole = await updateRole(roleToUpdate.role, roleToUpdate.permissions);
+
+  } catch (err) {
+    //Todo: send status code based on error type 
+    res.send('Error updating role')
+  }
+
+  res.json({ message: 'Successfully updated role', data: updatedRole })
+})
+
+router.delete('/:roleType', isAdmin, async (req, res) => {
+
+  try {
+    await deleteRole(req.params.roleType);
+
+  } catch (err) {
+    //Todo: send status code based on error type 
+    res.send('Error deleting role')
+    return;
+  }
+
+  res.json({ message: 'Successfully deleted role' })
+})
+
 export { router as rolesRouter };

@@ -9,11 +9,11 @@ interface IUser {
 }
 
 const userSchema = new Schema<IUser>({
-    internalId: String,
-    userName: String,
-    password: String,
-    fullName: String,
-    role: [{ type: Schema.Types.ObjectId, ref: 'Roles' }]
+  internalId: String,
+  userName: String,
+  password: String,
+  fullName: String,
+  role: { type: Schema.Types.ObjectId, ref: 'Role' }
 });
 
 export { IUser, userSchema };

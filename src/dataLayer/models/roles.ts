@@ -1,14 +1,20 @@
 import { Schema } from 'mongoose';
-import { role } from '../../types/roles'
+import { role, permissions } from '../../types/roles'
 
 interface IRole {
   role: role;
-  permissions: string
+  permissions: permissions
 }
 
+const permissionsSchema = new Schema({
+  orders: [String],
+  invoices: [String],
+  users: [String]
+});
+
 const rolesSchema = new Schema<IRole>({
-  role: String,
-  permissions: String
+  role: { type: String, unique: true },
+  permissions: permissionsSchema
 });
 
 export { IRole, rolesSchema };
